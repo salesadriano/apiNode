@@ -30,7 +30,8 @@
 				"formulahendry.auto-complete-tag",
 				"Gruntfuggly.todo-tree",
 				"ms-azuretools.vscode-docker",
-				"rangav.vscode-thunder-client"
+				"rangav.vscode-thunder-client",
+				"GitHub.vscode-pull-request-github"
 			]
 		}
 	}
