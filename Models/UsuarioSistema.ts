@@ -1,8 +1,5 @@
 import Modelo from "../helpers/Modelo";
 import { Pool } from "pg";
-import Query from "../helpers/Query"
-
-
 
 class UsuarioSistema extends Modelo {
   public idusuariosistema: number = 0;  
@@ -18,7 +15,6 @@ class UsuarioSistema extends Modelo {
     this.sourceName = "usuariosistema";
     this.pk = "idusuariosistema";
     this.hidden = ["senhausuariosistema"];
-    this.query = new Query(this);
   }
   
 };

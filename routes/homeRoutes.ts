@@ -1,13 +1,13 @@
 import { Router } from "express";
 import Db from "../util/Db";
-import { UsuarioSistema } from "../Models";
+import { UsuarioSistema, Entidade, EntidadeRazao } from "../Models";
 import Resposta from "../helpers/Resposta";
 
 const homeRouters = Router();
 
 homeRouters.route("/").get(async (req, res, next) => { 
-  const User = new UsuarioSistema(Db.db);  
-  let resul = await User.set({situacaousuariosistema: "ATIVO"}, {situacaousuariosistema: "INATIVO"} );
+  const entidade = new Entidade(Db.db);  
+  let resul = await entidade.findWithSon();
   Resposta.sendSucess(res, resul);
 });
 

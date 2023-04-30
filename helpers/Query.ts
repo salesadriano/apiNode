@@ -13,26 +13,16 @@ class Query {
     this._table = modelo.sourceName;
     this._pk = modelo.pk;
     Object.keys(modelo).forEach(el => {
-      switch (el) {
-        case "_sourceName":
-        case "_schema":
-        case "_type":
-        case "_dbConnection":
-        case "_pk":
-        case "_query":
-        case "_hidden":
-          break;
-        default:
-          this._attributes.push(el);
-          if (modelo.hidden) {
-            if (modelo.hidden.indexOf(el) === -1) { this._visible.push(el) }
-          }
-          else this._visible.push(el)
-          break;
+      if (el.substring(0, 1) != "_") {
+        this._attributes.push(el);
+        if (modelo.hidden) {
+          if (modelo.hidden.indexOf(el) === -1) { this._visible.push(el) }
+        }
+        else this._visible.push(el)
       }
     })
   }
-  
+
   select(parameters?: object, fields: Array<string> = [], registers: number = 0, page: number = 0): string {
     let strFields: string = " ";
     let where: string = "    ";
@@ -44,7 +34,7 @@ class Query {
 
     if (parameters) {
       Object.entries(parameters).forEach(key => {
-        igual = typeof(key[1]) == "string" && key[1].indexOf("%") >= 0 ? "like" : "="
+        igual = typeof (key[1]) == "string" && key[1].indexOf("%") >= 0 ? "like" : "="
         if (this._attributes.indexOf(key[0]) >= 0) where += `${key[0]} ${igual} '${key[1]}' and `;
       });
     }
@@ -66,7 +56,7 @@ class Query {
     strFields = strFields.substring(0, strFields.length - 1);
 
     sql = ` SELECT ${strFields} FROM ${this._table} ${where} ${limit} offset ${page * registers};`
-    
+
     return sql;
   }
   insert(data: object): string {
@@ -80,11 +70,11 @@ class Query {
         strFields += `${key[0]},`;
         strValues += `'${key[1]}',`;
       }
-      
+
     })
 
-    strFields = strFields.substring(0,strFields.length-1);
-    strValues = strValues.substring(0,strValues.length-1);
+    strFields = strFields.substring(0, strFields.length - 1);
+    strValues = strValues.substring(0, strValues.length - 1);
 
     sql = `insert into ${this._table}(${strFields}) select ${strValues};`;
 
@@ -101,14 +91,14 @@ class Query {
 
       if (this._attributes.indexOf(key[0]) >= 0 && key[0] != this._pk) {
         strValues += `${key[0]} = '${key[1]}',`;
-      }      
+      }
     })
 
-    strValues = strValues.substring(0,strValues.length-1);
+    strValues = strValues.substring(0, strValues.length - 1);
 
     if (parameters) {
       Object.entries(parameters).forEach(key => {
-        igual = typeof(key[1]) == "string" && key[1].indexOf("%") >= 0 ? "like" : "="
+        igual = typeof (key[1]) == "string" && key[1].indexOf("%") >= 0 ? "like" : "="
         if (this._attributes.indexOf(key[0]) >= 0) where += `${key[0]} ${igual} '${key[1]}' and `;
       });
     }
@@ -117,13 +107,13 @@ class Query {
     if (where.length > 0) where = `where ${where}`
 
     sql = `update ${this._table} set ${strValues} ${where}`;
-    
+
     return sql;
   }
   delete(id: number): string {
     return `delete from ${this._table} where ${this._pk} = '${id}';`;
   }
-  max(){
+  max() {
     return `select max(${this._pk}) ${this._pk} from ${this._table};`;
   }
 }

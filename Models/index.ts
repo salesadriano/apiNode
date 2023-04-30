@@ -1,4 +1,6 @@
 import UsuarioSistema from "./UsuarioSistema";
+import Entidade from "./Entidade";
+import EntidadeRazao from "./EntidadeRazao";
 
 
-export {UsuarioSistema}
+export {UsuarioSistema, Entidade, EntidadeRazao};
