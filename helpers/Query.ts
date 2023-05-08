@@ -58,6 +58,7 @@ class Query {
     sql = ` SELECT ${strFields} FROM ${this._table} ${where} ${limit} offset ${page * registers};`
 
     return sql;
+
   }
   insert(data: object): string {
     let sql: string = " ";
@@ -116,6 +117,27 @@ class Query {
   max() {
     return `select max(${this._pk}) ${this._pk} from ${this._table};`;
   }
+  count(parameters?: object): string {
+    let where: string = "    ";
+    let sql: string = " ";
+    let igual: string = "=";
+
+    if (parameters) {
+      Object.entries(parameters).forEach(key => {
+        igual = typeof (key[1]) == "string" && key[1].indexOf("%") >= 0 ? "like" : "="
+        if (this._attributes.indexOf(key[0]) >= 0) where += `${key[0]} ${igual} '${key[1]}' and `;
+      });
+    }
+
+    where = where.substring(0, where.length - 4);
+
+    if (where.length > 0) where = `where ${where}`
+
+    sql = ` SELECT count(1) as rows FROM ${this._table} ${where} ;`
+
+    return sql;
+  }
+
 }
 
 export default Query
