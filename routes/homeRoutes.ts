@@ -1,14 +1,35 @@
 import { Router } from "express";
-import Db from "../util/Db";
-import { UsuarioSistema, Entidade, EntidadeRazao } from "../Models";
+import { EntidadeController } from '../controllers'
 import Resposta from "../helpers/Resposta";
 
 const homeRouters = Router();
+const entidadeController = new EntidadeController();
 
-homeRouters.route("/").get(async (req, res, next) => { 
-  const entidade = new Entidade(Db.db);  
-  let resul = await entidade.findWithSon();
-  Resposta.sendSucess(res, resul);
+homeRouters.route("/").get(async (req, res, next) => {
+  entidadeController.get(req, res)
+  .then( resul => {
+    Resposta.sendSucess(res, resul);
+  }).catch( err => {
+    Resposta.sendInvalid(res, err);
+  })  
+});
+
+homeRouters.route("/").post(async (req, res, next) => {
+  entidadeController.set(req, res)
+  .then( resul => {
+    Resposta.sendSucess(res, resul);
+  }).catch( err => {
+    Resposta.sendInvalid(res, err);
+  })  
+});
+
+homeRouters.route("/").delete(async (req, res, next) => {
+  entidadeController.rm(req, res)
+  .then( resul => {
+    Resposta.sendSucess(res, resul);
+  }).catch( err => {
+    Resposta.sendInvalid(res, err);
+  })  
 });
 
 export default homeRouters;

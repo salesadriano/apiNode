@@ -2,11 +2,11 @@ import { Response } from "express";
 
 class Resposta {
   
-  sendSucess = (res: Response, data: object ) => {
+  sendSucess = (res: Response, data: any ) => {
     res.status(200).send(data);
   };
 
-  sendInvalid = (res: Response, data: object ) => {
+  sendInvalid = (res: Response, data: any ) => {
     res.status(403).send(data);
   };
 

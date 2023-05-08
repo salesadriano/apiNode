@@ -1,21 +1,22 @@
 import express from "express";
 
-class Parameter {
-  private parameters: object;
-
-  constructor( req: express.Request) {
-    this.parameters = {};
-    if (Object.keys(req.body).length) {
-      this.parameters = req.body;      
-    } else if (Object.keys(req.query).length) {
-      this.parameters = req.query;      
-    } else if (Object.keys(req.params).length) {
-      this.parameters = req.params;      
+class Parameter  {
+  
+  getParameter(req: express.Request):any { 
+    
+    let parameters: object = {};
+    
+    if (req.body && Object.keys(req.body).length > 0) {
+      parameters =  req.body;      
+    } else if (req.query && Object.keys(req.query).length > 0) {
+      parameters = req.query;      
+    } else if (req.params && Object.keys(req.params).length > 0) {
+      parameters = req.params;      
     }
-  }
-  get parameter():any {
-    return this.parameters;
+    
+    return parameters;
+
   }
  }
 
- export default Parameter;
+ export default new Parameter().getParameter ;

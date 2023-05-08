@@ -75,7 +75,8 @@ class Modelo implements iDataSource {
 
   async find(parameters?: object, fields?: Array<string>, numRegisters?: number, page?: number) {
     return new Promise<any>((resolve, reject) => {
-      this._dbConnection.query(this.query.select(parameters, fields, numRegisters, page))
+      const param = parameters ? this.getParameters(parameters) : {};
+      this._dbConnection.query(this.query.select(param, fields, numRegisters, page))
         .then(result => {
           resolve(result.rows);
         })
@@ -85,11 +86,23 @@ class Modelo implements iDataSource {
     });
   }
 
-  //TODO Não está funcionando
+  async count(parameters?: object) {
+    return new Promise<any>((resolve, reject) => {
+      const param = parameters ? this.getParameters(parameters) : {};
+      this._dbConnection.query(this.query.count(param))
+        .then(result => {
+          resolve(result.rows[0]["rows"] || 0);
+        })
+        .catch(e => {
+          reject(e);
+        })
+    });
+  }
+
   async findWithSon(parameters?: object, fields?: Array<string>, numRegisters?: number, page?: number) {
     return new Promise<any>((resolve, reject) => {
-
-      this._dbConnection.query(this.query.select(parameters, fields, numRegisters, page))
+      const param = parameters ? this.getParameters(parameters) : {};
+      this._dbConnection.query(this.query.select(param, fields, numRegisters, page))
         .then(async resul => {
           let filhos = this.filhos;
           let response: object[] = [];
@@ -108,7 +121,6 @@ class Modelo implements iDataSource {
     });
   }
 
-  //TODO Não está funcionando
   async processSon(el: any, filhos: iRelacionamento[] | undefined) {
     if (!filhos) return {};
     let promises = filhos.map(async fl => {
@@ -122,24 +134,29 @@ class Modelo implements iDataSource {
   }
 
   async set(values: object, parameters?: object) {
-    let pk: object = {};
+    const vlr = this.getParameters(values);
+    const param = parameters ? this.getParameters(parameters) : {};
+    let pk: any = undefined;
 
     Object.entries(values).forEach(el => {
       if (el[0] == this.pk) pk = JSON.parse(`{"${this.pk}" : ${el[1]} }`);
     })
 
     if (parameters) {
-      Object.entries(parameters).forEach(el => {
+      Object.entries(param).forEach(el => {
         if (el[0] == this.pk) pk = JSON.parse(`{"${this.pk}" : ${el[1]} }`);
       })
     }
-
-    if (Object.keys(pk).length > 0) {
+    
+    if (pk) {
       return new Promise<any>((resolve, reject) => {
-        this._dbConnection.query(this.query.update(values, pk))
+        this._dbConnection.query(this.query.update(vlr, pk))
           .then(result => {
             if (result.rowCount > 0)
-              resolve(pk);
+              this._dbConnection.query(this.query.select(pk))
+                .then( resul => {
+                  resolve(resul.rows);
+                }) 
             else {
               resolve({ msg: "No Register found" });
             }
@@ -148,31 +165,17 @@ class Modelo implements iDataSource {
             reject(e);
           })
       });
-    } else if (parameters) {
-      return new Promise<any>((resolve, reject) => {
-        var ret = {}
-        this._dbConnection.query(this.query.select(parameters, [this.pk]))
-          .then(result => {
-            ret = result.rows
-          });
-        this._dbConnection.query(this.query.update(values, parameters))
-          .then(result => {
-            if (result.rowCount > 0)
-              resolve(ret);
-            else
-              resolve({ msg: "No Register found" });
-          })
-          .catch(e => {
-            reject(e);
-          })
-      });
     } else {
       return new Promise<any>((resolve, reject) => {
-        this._dbConnection.query(this.query.insert(values))
+        this._dbConnection.query(this.query.insert(vlr))
           .then(() => {
             this._dbConnection.query(this.query.max())
-              .then(result => {
-                resolve(result.rows);
+              .then(result => {                
+                console.log(result.rows[0]);
+                this._dbConnection.query(this.query.select(result.rows[0]))
+                .then( resul => {
+                  resolve(resul.rows);
+                })                 
               })
           })
           .catch(e => {
@@ -182,18 +185,30 @@ class Modelo implements iDataSource {
     }
   }
 
-  async remove(idRegister: number) {
+  async remove(parameters: object) {
     return new Promise<any>((resolve, reject) => {
-      this._dbConnection.query(this.query.delete(idRegister))
-        .then(result => {
-          if (result.rowCount > 0)
-            resolve({ msg: "Register deleted" });
-          else
-            resolve({ msg: "No Register found" });
-        })
-        .catch(e => {
-          reject(e);
-        })
+      const param = parameters ? this.getParameters(parameters) : {};
+      let pk = undefined;
+
+      Object.entries(param).forEach(el => {
+        if (el[0] == this.pk) pk = el[1];
+      })
+
+      if (pk) {
+        this._dbConnection.query(this.query.delete(pk))
+          .then(result => {
+            if (result.rowCount > 0)
+              resolve({ msg: "Register deleted" });
+            else
+              resolve({ msg: "No Register found" });
+          })
+          .catch(e => {
+            reject(e);
+          })
+      } else {
+        reject({ "errorMsg": "No record found" });
+      }
+
     });
   }
 
@@ -220,6 +235,24 @@ class Modelo implements iDataSource {
       this._filhos?.push(tmp);
     }
   }
+
+  getParameters(parameters: object): object {
+
+    let param: object = {};
+
+    Object.entries(parameters).map(el => {
+      const keys = Object.keys(this);
+      for (let index = 0; index < keys.length; index++) {
+        if (keys[index] == el[0]) {
+          Object.assign(param, JSON.parse(`{"${el[0]}" : "${el[1]}" }`));
+        }
+      }
+    });
+
+    return param;
+
+  }
+
 }
 
 export default Modelo;

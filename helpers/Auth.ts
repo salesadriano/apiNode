@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import express from "express";
 import Db from "../util/Db";
-import Parameter from "../helpers/Parameter";
+import getParameter from "../helpers/Parameter";
 import dotenv from "dotenv"
 import Resposta from "./Resposta";
 
@@ -45,7 +45,7 @@ class Auth {
   }
 
   login(req: express.Request, res: express.Response, next: express.NextFunction ) { 
-    let parametro = new Parameter(req).parameter
+    let parametro = getParameter(req);
     if(!parametro.loginusuariosistema || !parametro.senhausuariosistema) {
       return Resposta.sendInvalid(res,{msg: "sdfjsdkgj"})
     }    
