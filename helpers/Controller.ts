@@ -15,7 +15,7 @@ class Controller {
     return this._modelo;
   }
 
-  async get(req: Request, res: Response) {
+  async get(req: Request) {
     return new Promise((resolve, reject) => {
       try {
         const param = getParameter(req);
@@ -55,7 +55,7 @@ class Controller {
     });
   }
 
-  async set(req: Request, res: Response) {
+  async set(req: Request) {
     return new Promise((resolve, reject) => {
       const param = getParameter(req);
       let hasCriteria = undefined;
@@ -75,7 +75,7 @@ class Controller {
     })
   }
 
-  async rm(req: Request, res: Response) {
+  async rm(req: Request) {
     return new Promise((resolve, reject) => {
       const param = getParameter(req);
       
