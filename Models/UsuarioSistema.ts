@@ -15,7 +15,7 @@ class UsuarioSistema extends Modelo {
     this.sourceName = "usuariosistema";
     this.pk = "idusuariosistema";
     this.hidden = ["senhausuariosistema"];
-  }
+  }  
   
 };
 
